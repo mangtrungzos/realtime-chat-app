@@ -4,6 +4,7 @@ import { RoomContext } from "../context/RoomContext";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { PeerState } from "../context/peerReducer";
 import { ShareScreenButton } from "../components/ShareScreenButton";
+import React from "react";
 
 export const Room = () => {
     const { id } =  useParams();
