@@ -42,7 +42,7 @@ const [roomId, setRoomId] = useState<string>();
             const videoTrack = stream?.getVideoTracks()[0];
             connection[0].peerConnection
                 .getSenders()[1]
-                .replaceTrack(videoTrack)
+                .replaceTrack(videoTrack) 
                 .catch((err: any) => console.error(err));
         });
     };
