@@ -66,9 +66,9 @@ const [roomId, setRoomId] = useState<string>();
         const meId = uuidV4();
 
         const peer = new Peer(meId, {
-            host: 'localhost',
+            host: "localhost",
             port: 9000,
-            path: '/myapp',
+            path: "/",
         });
         // Set State
         setMe(peer);
