@@ -13,6 +13,7 @@
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.23",
     "@types/uuid": "^9.0.8",
+    "classnames": "^2.5.1",
     "immutable": "^5.0.0-beta.5",
     "peerjs": "^1.3.2",
     "react": "^18.2.0",

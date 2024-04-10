@@ -46,35 +46,64 @@ const [roomId, setRoomId] = useState<string>();
                 .catch((err: any) => console.error(err));
         });
     };
-
+    // const switchStream = (stream: MediaStream) => {
+    //     if (!stream) {
+    //         console.error("Stream is null or undefined.");
+    //         return;
+    //     }
     
-    const shareScreen = () => {
-        if (screenSharingId) {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(switchStream)
-                .catch((err: any) => console.error(err));
-        } else {
-            navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-                .then(switchStream)
-                .catch((err: any) => console.error(err));
+    //     setStream(stream);
+    //     setScreenSharingId(me?.id || "");
+    
+    //     Object.values(me?.connections || {}).forEach((connection: any) => {
+    //         const peerConnection = connection[0].peerConnection;
+    //         if (peerConnection && typeof peerConnection.getSenders === 'function') {
+    //             const videoTracks = stream.getVideoTracks();
+    //             if (videoTracks.length > 0) {
+    //                 const videoTrack = videoTracks[0];
+    //                 const senders = peerConnection.getSenders();
+    //                 const videoSender = senders.find((sender: any) => sender.track?.kind === 'video');
+    //                 if (videoSender) {
+    //                     videoSender.replaceTrack(videoTrack)
+    //                         .catch((err: any) => console.error("Error replacing video track:", err));
+    //                 } else {
+    //                     console.error("Video sender not found in connection.");
+    //                 }
+    //             } else {
+    //                 console.error("No video tracks found in the stream.");
+    //             }
+    //         } else {
+    //             console.error("Peer connection is not properly initialized.");
+    //         }
+    //     });
+    // };
+    
+    
+    const shareScreen = async () => {
+        try {
+            if (screenSharingId) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                switchStream(stream);
+            } else {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                switchStream(stream);
+            }
+        } catch (err) {
+            console.error('Error accessing media devices:', err);
         }
     };
     
+   
     
     useEffect(() => {
         // Create a new Id for the peer
         const meId = uuidV4();
-
-        // const peer = new Peer(meId, {
-        //     host: "localhost",
-        //     port: 9000,
-        //     path: "/",
-        // });
         const peer = new Peer(meId, {
             host: "localhost",
             port: 9000,
             path: "/myapp"
         });
+        // const peer = new Peer(meId)
         // Set State
         setMe(peer);
 

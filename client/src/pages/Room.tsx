@@ -4,7 +4,8 @@ import { RoomContext } from "../context/RoomContext";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { PeerState } from "../context/peerReducer";
 import { ShareScreenButton } from "../components/ShareScreenButton";
-import React from "react";
+import { ChatButton } from "../components/ChatButton";
+import { Chat } from "../components/chat/Chat";
 
 export const Room = () => {
     const { id } =  useParams();
@@ -24,9 +25,9 @@ export const Room = () => {
     const {[screenSharingId]: sharing, ...peersToShow} = peers;
             
     return (
-        <>
-            Room id {id}
-            <div className="flex ">
+        <div className="flex flex-col min-h-screen">
+            <div className="bg-red-500 p-4 text-white">Room id {id}</div>
+            <div className="flex grow">
                 {screenSharingVideo && (
                     <div className="w-4/5 pr-4">
                         <VideoPlayer stream={screenSharingVideo}/>
@@ -44,13 +45,17 @@ export const Room = () => {
                     {Object.values(peersToShow as PeerState).map((peer) => (
                         <VideoPlayer stream = {peer.stream} />
                     ))}
+                </div>
+                <div className="border-l-2">
+                        <Chat />
                 </div>  
             </div>
               
-            <div className="fixed bottom-0 p-6 w-full flex justify-center border-t-2 bg-white">
+            <div className="h-28 bottom-0 p-6 w-full flex items-center justify-center border-t-2 bg-white">
                 <ShareScreenButton onClick={shareScreen} />
+                <ChatButton onClick={shareScreen} />
             </div>
-        </>
+        </div>
         
     );
 };

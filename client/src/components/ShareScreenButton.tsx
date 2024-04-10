@@ -1,15 +1,14 @@
-import React from "react";
-
-export const ShareScreenButton: React.FC<{onClick: () => void}> = ({
-    onClick
-}) => {
+export const ShareScreenButton: React.FC<{onClick: () => void}> = ({ onClick }) => {
     return (
-        <button>
+        <button 
+            className="bg-rose-400 p-5 rounded-lg text-xl hover:bg-rose-600 text-white"    
+            onClick={onClick}
+        >
             <svg xmlns="http://www.w3.org/2000/svg" 
                 fill="none" viewBox="0 0 24 24" 
-                strokeWidth={1.5} 
+                strokeWidth={2} 
                 stroke="currentColor" 
-                className="bg-rose-400 p-5 w-14 rounded-lg text-lx hover:bg-rose-600 text-white" onClick={onClick}>
+                className="h-6 w-6">
                 <path 
                     strokeLinecap="round" 
                     strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
