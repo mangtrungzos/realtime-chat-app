@@ -25,3 +25,6 @@
 
 # Peer-to-Peer connection work
 \\ need to call every peer in the room and to send them a video stream - send their own stream to us and show them in the video grid in our room
+
+# Hide and show chat messages
+\\

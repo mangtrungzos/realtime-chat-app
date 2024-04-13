@@ -8,8 +8,8 @@ export const ChatBubble: React.FC<{message: IMessage}> = ({message}) => {
     return (
         
             <div className={classNames("m-2 flex", {
-                "pl-10 justify-end": isSelf,
-                "pl-10 justify-start": !isSelf,
+                "pl-1 justify-end": isSelf,
+                "pl-1 justify-start": !isSelf,
             })}>
                 <div className={classNames("inline-block py-2 px-4 rounded", {
                     "bg-red-200": isSelf,

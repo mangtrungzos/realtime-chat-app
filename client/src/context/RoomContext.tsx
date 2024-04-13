@@ -3,8 +3,11 @@ import socketIOClient from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import Peer from "peerjs";
 import { v4 as uuidV4 } from "uuid"
-import { peersReducer } from "./peerReducer";
-import { addPeerAction, removePeerAction } from "./peerActions";
+import { peersReducer } from "../reducers/peerReducer";
+import { addPeerAction, removePeerAction } from "../reducers/peerActions";
+import { IMessage } from "../types/chat";
+import { chatReducer } from "../reducers/chatReducer";
+import { addHistoryAction, addMessageAction, toggleChatAction } from "../reducers/chatActions";
 
 const WS = "http://localhost:8080";
 
@@ -20,6 +23,10 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const [me, setMe] = useState<Peer>();
     const [stream, setStream] = useState<MediaStream>();
     const [peers, dispatch] = useReducer(peersReducer, {});
+    const [chat, chatDispatch] = useReducer(chatReducer, {
+        messages: [],
+        isChatOpen: false,
+    });
     const [screenSharingId, setScreenSharingId] = useState<string>("");
 const [roomId, setRoomId] = useState<string>();
     const enterRoom = ({ roomId }: {roomId: "string"}) => {
@@ -46,38 +53,6 @@ const [roomId, setRoomId] = useState<string>();
                 .catch((err: any) => console.error(err));
         });
     };
-    // const switchStream = (stream: MediaStream) => {
-    //     if (!stream) {
-    //         console.error("Stream is null or undefined.");
-    //         return;
-    //     }
-    
-    //     setStream(stream);
-    //     setScreenSharingId(me?.id || "");
-    
-    //     Object.values(me?.connections || {}).forEach((connection: any) => {
-    //         const peerConnection = connection[0].peerConnection;
-    //         if (peerConnection && typeof peerConnection.getSenders === 'function') {
-    //             const videoTracks = stream.getVideoTracks();
-    //             if (videoTracks.length > 0) {
-    //                 const videoTrack = videoTracks[0];
-    //                 const senders = peerConnection.getSenders();
-    //                 const videoSender = senders.find((sender: any) => sender.track?.kind === 'video');
-    //                 if (videoSender) {
-    //                     videoSender.replaceTrack(videoTrack)
-    //                         .catch((err: any) => console.error("Error replacing video track:", err));
-    //                 } else {
-    //                     console.error("Video sender not found in connection.");
-    //                 }
-    //             } else {
-    //                 console.error("No video tracks found in the stream.");
-    //             }
-    //         } else {
-    //             console.error("Peer connection is not properly initialized.");
-    //         }
-    //     });
-    // };
-    
     
     const shareScreen = async () => {
         try {
@@ -92,9 +67,32 @@ const [roomId, setRoomId] = useState<string>();
             console.error('Error accessing media devices:', err);
         }
     };
-    
-   
-    
+
+    const sendMessage = (message: string) => {
+        const messageData: IMessage = {
+            content: message,
+            timestamp: new Date().getTime(),
+            author: me?.id,
+        };
+        chatDispatch(addMessageAction(messageData));
+
+
+        ws.emit("send-message",roomId, messageData);
+    };
+
+    const addMessage = (message: IMessage) => {
+        console.log("new message", message);
+        chatDispatch(addMessageAction(message));
+    };
+
+    const addHistory = (messages: IMessage[]) => {
+        chatDispatch(addHistoryAction(messages));
+    };
+
+    const toggleChat = () => {
+        chatDispatch(toggleChatAction(!chat.isChatOpen));
+    };
+
     useEffect(() => {
         // Create a new Id for the peer
         const meId = uuidV4();
@@ -117,14 +115,13 @@ const [roomId, setRoomId] = useState<string>();
             console.error(error);
         }
         ws.on("room-created", enterRoom);
-        ws.on("get-users",getUsers);
+        ws.on("get-users", getUsers);
         ws.on("user-disconnected", removePeer);
-        ws.on("user-started-sharing",(peerId) => {
-            setScreenSharingId(peerId);
-        });
-        ws.on("user-stopped-sharing",() => {
-            setScreenSharingId("");
-        });
+        ws.on("user-started-sharing",(peerId) => setScreenSharingId(peerId));
+        ws.on("user-stopped-sharing",() => setScreenSharingId(""));
+        ws.on("add-message", addMessage);
+        ws.on("get-messages", addHistory);
+
         return () => {
             ws.off("room-created", enterRoom);
             ws.off("get-users",getUsers);
@@ -132,6 +129,8 @@ const [roomId, setRoomId] = useState<string>();
             ws.off("user-started-sharing");
             ws.off("user-stopped-sharing");
             ws.off("user-joined");
+            ws.off("add-message");
+
         }
 
     }, []);
@@ -166,9 +165,23 @@ const [roomId, setRoomId] = useState<string>();
     console.log({ peers });
 
     return (
-        <RoomContext.Provider value={{ ws, me, stream, peers, shareScreen, screenSharingId, setRoomId }}>
+        <RoomContext.Provider 
+            value={{ 
+                ws, 
+                me, 
+                stream, 
+                peers, 
+                shareScreen, 
+                screenSharingId, 
+                setRoomId,
+                sendMessage,
+                chat,
+                toggleChat,
+            }}>
             {children}
         </RoomContext.Provider>
     );
 };
+
+
 

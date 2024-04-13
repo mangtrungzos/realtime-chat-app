@@ -2,14 +2,24 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { RoomContext } from "../context/RoomContext";
 import { VideoPlayer } from "../components/VideoPlayer";
-import { PeerState } from "../context/peerReducer";
+import { PeerState } from "../reducers/peerReducer";
 import { ShareScreenButton } from "../components/ShareScreenButton";
 import { ChatButton } from "../components/ChatButton";
 import { Chat } from "../components/chat/Chat";
 
 export const Room = () => {
     const { id } =  useParams();
-    const { ws, me, stream, peers, shareScreen, screenSharingId, setRoomId } = useContext(RoomContext);
+    const { 
+        ws, 
+        me, 
+        stream, 
+        peers, 
+        shareScreen, 
+        screenSharingId, 
+        setRoomId, 
+        toggleChat, 
+        chat, 
+    } = useContext(RoomContext);
      
 
     useEffect(() => {
@@ -46,14 +56,16 @@ export const Room = () => {
                         <VideoPlayer stream = {peer.stream} />
                     ))}
                 </div>
-                <div className="border-l-2">
-                        <Chat />
-                </div>  
+                {chat.isChatOpen && (
+                    <div className="border-l-2">
+                            <Chat />
+                    </div>  
+                )}
             </div>
               
             <div className="h-28 bottom-0 p-6 w-full flex items-center justify-center border-t-2 bg-white">
                 <ShareScreenButton onClick={shareScreen} />
-                <ChatButton onClick={shareScreen} />
+                <ChatButton onClick={toggleChat} />
             </div>
         </div>
         

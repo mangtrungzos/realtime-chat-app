@@ -1,8 +1,9 @@
-export const ChatButton: React.FC<{onClick: () => void}> = ({
-    onClick
-}) => {
+export const ChatButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     return (
-        <button className="bg-rose-400 p-5 mx-2 rounded-lg text-xl hover:bg-rose-600 text-white">
+        <button 
+            className="bg-rose-400 p-5 mx-2 rounded-lg text-xl hover:bg-rose-600 text-white" 
+            onClick={onClick}
+        >
             <svg xmlns="http://www.w3.org/2000/svg" 
                 fill="none" 
                 viewBox="0 0 24 24" 
