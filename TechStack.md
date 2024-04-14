@@ -27,4 +27,8 @@
 \\ need to call every peer in the room and to send them a video stream - send their own stream to us and show them in the video grid in our room
 
 # Hide and show chat messages
-\\
+
+# Add user names
+\\ User will be saved in the local storage if it's not some kind of sensitive data, if it's not some token or information we don't want to share and it's just some string like userName or phone or something not so important, not so secure and then we can just save  it in local storage.
+
+9:31

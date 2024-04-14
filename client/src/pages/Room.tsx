@@ -6,12 +6,14 @@ import { PeerState } from "../reducers/peerReducer";
 import { ShareScreenButton } from "../components/ShareScreenButton";
 import { ChatButton } from "../components/ChatButton";
 import { Chat } from "../components/chat/Chat";
+import { NameInput } from "../common/name";
 
 export const Room = () => {
     const { id } =  useParams();
     const { 
         ws, 
         me, 
+        userName,
         stream, 
         peers, 
         shareScreen, 
@@ -23,8 +25,8 @@ export const Room = () => {
      
 
     useEffect(() => {
-        if (me) ws.emit("join-room", {roomId: id, peerId: me._id});
-    }, [id, me, ws]);
+        if (me && stream) ws.emit("join-room", {roomId: id, peerId: me._id, userName});
+    }, [id, me, ws, stream]);
 
     useEffect(() => {
         setRoomId(id);
@@ -49,11 +51,20 @@ export const Room = () => {
                     }`}
                 >
                     {screenSharingId !== me?.id && (
-                        <VideoPlayer stream = {stream} />
+                        <div>
+                            <VideoPlayer stream = {stream} />
+                            <NameInput />
+                        </div>
+                        
                     )}
 
-                    {Object.values(peersToShow as PeerState).map((peer) => (
-                        <VideoPlayer stream = {peer.stream} />
+                    {Object.values(peersToShow as PeerState)
+                        .filter((peer) => !!peer.stream)
+                        .map((peer) => (
+                        <div>
+                            <VideoPlayer stream = {peer.stream} />
+                            <div>{peer.userName}</div>
+                        </div>
                     ))}
                 </div>
                 {chat.isChatOpen && (

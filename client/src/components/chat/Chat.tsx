@@ -8,7 +8,8 @@ export const Chat: React.FC = ({}) => {
     
     return (
         <div className="flex flex-col h-full justify-between">
-            <div>{chat.messages && chat.messages.map((message: IMessage) => (
+            <div>
+                {chat.messages.map((message: IMessage) => (
                 <ChatBubble message={message} />
             ))}
             </div>

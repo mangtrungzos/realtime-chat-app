@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Peer from "peerjs";
 import { v4 as uuidV4 } from "uuid"
 import { peersReducer } from "../reducers/peerReducer";
-import { addPeerAction, removePeerAction } from "../reducers/peerActions";
+import { addPeerStreamAction, addPeerNameAction, removePeerStreamAction, addAllPeersAction } from "../reducers/peerActions";
 import { IMessage } from "../types/chat";
 import { chatReducer } from "../reducers/chatReducer";
 import { addHistoryAction, addMessageAction, toggleChatAction } from "../reducers/chatActions";
@@ -21,6 +21,8 @@ const ws = socketIOClient(WS);
 export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const navigate = useNavigate();
     const [me, setMe] = useState<Peer>();
+    const [userName, setUserName] = useState(
+        localStorage.getItem("userName") || "");
     const [stream, setStream] = useState<MediaStream>();
     const [peers, dispatch] = useReducer(peersReducer, {});
     const [chat, chatDispatch] = useReducer(chatReducer, {
@@ -28,16 +30,22 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         isChatOpen: false,
     });
     const [screenSharingId, setScreenSharingId] = useState<string>("");
-const [roomId, setRoomId] = useState<string>();
+    const [roomId, setRoomId] = useState<string>();
     const enterRoom = ({ roomId }: {roomId: "string"}) => {
         console.log({ roomId });
         navigate(`/room/${roomId}`);
     };
-    const getUsers = ({participants}: { participants: string[] }) => {
+    
+    const getUsers = ({
+        participants
+    }: { 
+        participants: Record<string, {userName: string}>;
+    }) => {
         console.log({participants});
+        dispatch(addAllPeersAction(participants));
     };
     const removePeer = (peerId: string) => {
-        dispatch(removePeerAction(peerId));
+        dispatch(removePeerStreamAction(peerId));
     };
 
     const switchStream = (stream: MediaStream) => {
@@ -93,13 +101,32 @@ const [roomId, setRoomId] = useState<string>();
         chatDispatch(toggleChatAction(!chat.isChatOpen));
     };
 
+    const nameChangedHandler = ({ peerId, userName }: {
+        peerId: string,
+        userName: string
+    }) => {
+        dispatch(addPeerNameAction(peerId, userName));
+    };
+
     useEffect(() => {
+        localStorage.setItem("userName", userName);
+    }, [userName]);
+
+    useEffect(() => {
+        ws.emit("change-name", { peerId: me?.id, userName, roomId})
+    }, [userName, me,roomId]);
+
+    useEffect(() => {
+        const savedId = localStorage.getItem("userId");
         // Create a new Id for the peer
-        const meId = uuidV4();
+        const meId = savedId || uuidV4();
+        // const meId = uuidV4();
+        localStorage.setItem("userId", meId);
+
         const peer = new Peer(meId, {
             host: "localhost",
             port: 9000,
-            path: "/myapp"
+            path: "/"
         });
         // const peer = new Peer(meId)
         // Set State
@@ -121,15 +148,17 @@ const [roomId, setRoomId] = useState<string>();
         ws.on("user-stopped-sharing",() => setScreenSharingId(""));
         ws.on("add-message", addMessage);
         ws.on("get-messages", addHistory);
+        ws.on("name-changed", nameChangedHandler);
 
         return () => {
-            ws.off("room-created", enterRoom);
-            ws.off("get-users",getUsers);
-            ws.off("user-disconnected", removePeer);
+            ws.off("room-created");
+            ws.off("get-users");
+            ws.off("user-disconnected");
             ws.off("user-started-sharing");
             ws.off("user-stopped-sharing");
             ws.off("user-joined");
             ws.off("add-message");
+            ws.off("name-changed");
 
         }
 
@@ -146,21 +175,28 @@ const [roomId, setRoomId] = useState<string>();
     useEffect(() => {
         if (!me || !stream) return;
 
-        ws.on("user-joined", ({peerId}) => {
-            const call = me.call(peerId, stream);
+        ws.on("user-joined", ({peerId, userName: name}) => {
+            dispatch(addPeerNameAction(peerId, name));   
+            const call = me.call(peerId, stream, {
+                metadata: {
+                    userName,
+                },
+            });
             
             call.on("stream", (peerStream) => {
-                dispatch(addPeerAction(peerId, peerStream));
+                dispatch(addPeerStreamAction(peerId, peerStream));
             });
         });
 
         me.on("call", (call) => {
+            const { userName } = call.metadata.userName;
+            dispatch(addPeerNameAction(call.peer, userName));
             call.answer(stream);
             call.on("stream", (peerStream) => {
-                dispatch(addPeerAction(call.peer, peerStream))
+                dispatch(addPeerStreamAction(call.peer, peerStream))
             });
         });
-    }, [me, stream, screenSharingId]);
+    }, [me, stream, screenSharingId, userName]);
 
     console.log({ peers });
 
@@ -177,6 +213,8 @@ const [roomId, setRoomId] = useState<string>();
                 sendMessage,
                 chat,
                 toggleChat,
+                userName, 
+                setUserName,
             }}>
             {children}
         </RoomContext.Provider>
