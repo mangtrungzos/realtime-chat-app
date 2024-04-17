@@ -1,36 +1,42 @@
-import React, { createContext, useEffect, useState, useReducer } from "react";
-import socketIOClient from "socket.io-client";
+import React, { createContext, useEffect, useState, useReducer, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Peer from "peerjs";
-import { v4 as uuidV4 } from "uuid"
-import { peersReducer } from "../reducers/peerReducer";
+import { ws } from "../ws"
+import { PeerState, peersReducer } from "../reducers/peerReducer";
 import { addPeerStreamAction, addPeerNameAction, removePeerStreamAction, addAllPeersAction } from "../reducers/peerActions";
-import { IMessage } from "../types/chat";
-import { chatReducer } from "../reducers/chatReducer";
-import { addHistoryAction, addMessageAction, toggleChatAction } from "../reducers/chatActions";
+import { UserContext } from "./UserContext";
+import { IPeer } from "../types/peer"
 
-const WS = "http://localhost:8080";
+interface RoomValue {
+    stream?: MediaStream;
+    peers: PeerState;
+    shareScreen: () => void;
+    roomId: string;
+    setRoomId: (id: string) => void;
+    screenSharingId: string;
+}
 
-export const RoomContext = createContext<null | any>(null);
+
+export const RoomContext = createContext<RoomValue>({
+    peers: {},
+    shareScreen: () => {},
+    setRoomId: (id) => {},
+    screenSharingId: "",
+    roomId: "",
+});
 
 interface ChildProps {
     children: React.ReactNode;
 }   
-const ws = socketIOClient(WS);
 
 export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const navigate = useNavigate();
+    const { userName, userId } = useContext(UserContext);
     const [me, setMe] = useState<Peer>();
-    const [userName, setUserName] = useState(
-        localStorage.getItem("userName") || "");
     const [stream, setStream] = useState<MediaStream>();
     const [peers, dispatch] = useReducer(peersReducer, {});
-    const [chat, chatDispatch] = useReducer(chatReducer, {
-        messages: [],
-        isChatOpen: false,
-    });
     const [screenSharingId, setScreenSharingId] = useState<string>("");
-    const [roomId, setRoomId] = useState<string>();
+    const [roomId, setRoomId] = useState<string>("");
     const enterRoom = ({ roomId }: {roomId: "string"}) => {
         console.log({ roomId });
         navigate(`/room/${roomId}`);
@@ -39,7 +45,7 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const getUsers = ({
         participants
     }: { 
-        participants: Record<string, {userName: string}>;
+        participants: Record<string, IPeer>;
     }) => {
         console.log({participants});
         dispatch(addAllPeersAction(participants));
@@ -76,31 +82,6 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         }
     };
 
-    const sendMessage = (message: string) => {
-        const messageData: IMessage = {
-            content: message,
-            timestamp: new Date().getTime(),
-            author: me?.id,
-        };
-        chatDispatch(addMessageAction(messageData));
-
-
-        ws.emit("send-message",roomId, messageData);
-    };
-
-    const addMessage = (message: IMessage) => {
-        console.log("new message", message);
-        chatDispatch(addMessageAction(message));
-    };
-
-    const addHistory = (messages: IMessage[]) => {
-        chatDispatch(addHistoryAction(messages));
-    };
-
-    const toggleChat = () => {
-        chatDispatch(toggleChatAction(!chat.isChatOpen));
-    };
-
     const nameChangedHandler = ({ peerId, userName }: {
         peerId: string,
         userName: string
@@ -109,24 +90,16 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     };
 
     useEffect(() => {
-        localStorage.setItem("userName", userName);
-    }, [userName]);
+        ws.emit("change-name", { peerId: userId, userName, roomId})
+    }, [userName, userId,roomId]);
 
     useEffect(() => {
-        ws.emit("change-name", { peerId: me?.id, userName, roomId})
-    }, [userName, me,roomId]);
+        
 
-    useEffect(() => {
-        const savedId = localStorage.getItem("userId");
-        // Create a new Id for the peer
-        const meId = savedId || uuidV4();
-        // const meId = uuidV4();
-        localStorage.setItem("userId", meId);
-
-        const peer = new Peer(meId, {
+        const peer = new Peer(userId, {
             host: "localhost",
             port: 9000,
-            path: "/"
+            path: "/myapp"
         });
         // const peer = new Peer(meId)
         // Set State
@@ -146,8 +119,6 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         ws.on("user-disconnected", removePeer);
         ws.on("user-started-sharing",(peerId) => setScreenSharingId(peerId));
         ws.on("user-stopped-sharing",() => setScreenSharingId(""));
-        ws.on("add-message", addMessage);
-        ws.on("get-messages", addHistory);
         ws.on("name-changed", nameChangedHandler);
 
         return () => {
@@ -157,11 +128,12 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
             ws.off("user-started-sharing");
             ws.off("user-stopped-sharing");
             ws.off("user-joined");
-            ws.off("add-message");
             ws.off("name-changed");
+            me?.disconnect();
 
         }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -203,18 +175,12 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     return (
         <RoomContext.Provider 
             value={{ 
-                ws, 
-                me, 
                 stream, 
                 peers, 
                 shareScreen, 
-                screenSharingId, 
+                roomId: roomId || "",
                 setRoomId,
-                sendMessage,
-                chat,
-                toggleChat,
-                userName, 
-                setUserName,
+                screenSharingId, 
             }}>
             {children}
         </RoomContext.Provider>

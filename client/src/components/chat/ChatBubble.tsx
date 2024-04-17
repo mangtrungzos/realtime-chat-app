@@ -2,11 +2,13 @@ import { useContext } from "react";
 import { IMessage } from "../../types/chat";
 import { RoomContext } from "../../context/RoomContext";
 import classNames from "classnames";
+import { UserContext } from "../../context/UserContext";
 export const ChatBubble: React.FC<{message: IMessage}> = ({message}) => {
-    const { me, peers } = useContext(RoomContext);
-    const author = message.author && peers[message.author].userName;
-    const userName = author?.userName || "Anonnmous";
-    const isSelf = message.author === me?.id;
+    const { peers } = useContext(RoomContext);
+    const { userId } = useContext(UserContext)
+    const author = message.author && peers[message.author];
+    const userName = author || "Anonynmous";
+    const isSelf = message.author === userId;
     const time = new Date(message.timestamp).toLocaleTimeString();
     return (
         
@@ -38,7 +40,7 @@ export const ChatBubble: React.FC<{message: IMessage}> = ({message}) => {
                     "text-left": !isSelf,
                 })}
                 >
-                    {isSelf ? "You" : userName}</div>
+                    {isSelf ? "You" : userName.toString()}</div>
             </div>
     );
 };

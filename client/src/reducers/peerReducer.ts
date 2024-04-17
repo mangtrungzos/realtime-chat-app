@@ -1,6 +1,9 @@
+import { IPeer } from "../types/peer";
 import { ADD_PEER_STREAM, REMOVE_PEER_STREAM, ADD_PEER_NAME, ADD_ALL_PEERS } from "./peerActions";
 
-export type PeerState = Record<string, {stream?: MediaStream, userName?: string}>;
+export type PeerState = Record<
+    string, { stream?: MediaStream; userName?: string; peerId: string}
+>;
 type PeerAction = 
     | {
         type: typeof ADD_PEER_STREAM;
@@ -16,7 +19,7 @@ type PeerAction =
     }
     | {
         type: typeof ADD_ALL_PEERS;
-        payload: { peers: Record<string, {userName: string}> };
+        payload: { peers: Record<string, IPeer> };
     }
 
       export const peersReducer = (state: PeerState, action: PeerAction) => {
