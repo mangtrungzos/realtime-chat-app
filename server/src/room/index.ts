@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 
 const rooms: Record<string, Record<string, IUser>> = {};
-const chats: Record<string, IMessage[]> = {};    
+const chats: Record<string, IMessage[]> = {};
 
 interface IUser {
     peerId: string;
@@ -56,7 +56,7 @@ export const roomHandler = (socket: Socket) => {
             leaveRoom({ roomId, peerId });
         });
     };
-    
+
     const leaveRoom = ({peerId, roomId}: IRoomParams) => {
             // rooms[roomId] = rooms[roomId].filter(id => id !== peerId);
         socket.to(roomId).emit("user-disconnected", peerId);
@@ -81,7 +81,7 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const changeName = ({peerId, userName, roomId}: {
-        peerId: string, 
+        peerId: string,
         userName: string,
         roomId: string,
 
