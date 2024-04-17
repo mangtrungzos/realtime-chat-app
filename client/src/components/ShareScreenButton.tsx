@@ -1,4 +1,6 @@
-export const ShareScreenButton: React.FC<{onClick: () => void}> = ({ onClick }) => {
+export const ShareScreenButton: React.FC<{onClick: () => void}> = ({
+    onClick
+}) => {
     return (
         <button 
             className="bg-rose-400 p-5 rounded-lg text-xl hover:bg-rose-600 text-white"    
