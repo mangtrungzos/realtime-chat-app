@@ -33,6 +33,4 @@
 
 # Refractor React WebRTC app
 
-# Testing
-## test all file in client 
-\\ yarn test --coverage 
+# 9:32 
