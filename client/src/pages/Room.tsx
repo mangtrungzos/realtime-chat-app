@@ -13,7 +13,8 @@ import { ChatContext } from "../context/ChatContext";
 export const Room = () => {
     const { id } =  useParams();
     const { 
-        stream, 
+        stream,
+        screenStream, 
         peers, 
         shareScreen, 
         screenSharingId, 
@@ -30,9 +31,12 @@ export const Room = () => {
         setRoomId(id || "");
     }, [id, setRoomId]);
 
-    console.log({screenSharingId});
+    // console.log({screenSharingId});
+    
     const screenSharingVideo = 
-        screenSharingId === userId ? stream: peers[screenSharingId]?.stream;
+        screenSharingId === userId 
+            ? screenStream
+            : peers[screenSharingId]?.stream;
     
     const {[screenSharingId]: sharing, ...peersToShow} = peers;
             

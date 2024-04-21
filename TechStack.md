@@ -33,6 +33,8 @@
 
 # Refractor React WebRTC app
 
-# Testing
+# Testing 
+\\ yarn test
 ## test all file in client 
 \\ yarn test --coverage 
+\\ Room.test, Chat.test

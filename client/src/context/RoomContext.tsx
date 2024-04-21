@@ -9,6 +9,7 @@ import { IPeer } from "../types/peer"
 
 interface RoomValue {
     stream?: MediaStream;
+    screenStream?: MediaStream;
     peers: PeerState;
     shareScreen: () => void;
     roomId: string;
@@ -34,11 +35,12 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const { userName, userId } = useContext(UserContext);
     const [me, setMe] = useState<Peer>();
     const [stream, setStream] = useState<MediaStream>();
+    const [screenStream, setScreenStream] = useState<MediaStream>();
     const [peers, dispatch] = useReducer(peersReducer, {});
     const [screenSharingId, setScreenSharingId] = useState<string>("");
     const [roomId, setRoomId] = useState<string>("");
     const enterRoom = ({ roomId }: {roomId: "string"}) => {
-        console.log({ roomId });
+        // console.log({ roomId });
         navigate(`/room/${roomId}`);
     };
     
@@ -54,31 +56,45 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         dispatch(removePeerStreamAction(peerId));
     };
 
-    const switchStream = (stream: MediaStream) => {
-        
-        setStream(stream);
+    const switchStream = (stream: MediaStream) => {        
         setScreenSharingId(me?.id || "");
-    
+
         Object.values(me?.connections || {}).forEach((connection: any) => {
-            const videoTrack = stream?.getVideoTracks()[0];
+            const videoTrack = stream
+                ?.getTracks()
+                .find((track) => track.kind === "video");
             connection[0].peerConnection
-                .getSenders()[1]
+                .getSenders()
+                .find((sender: any) => sender.track.kind === "video")
                 .replaceTrack(videoTrack) 
                 .catch((err: any) => console.error(err));
         });
     };
     
-    const shareScreen = async () => {
-        try {
-            if (screenSharingId) {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    // const shareScreen = async () => {
+    //     try {
+    //         if (screenSharingId) {
+    //             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    //             switchStream(stream);
+    //         } else {
+    //             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    //             switchStream(stream);
+    //         }
+    //     } catch (err) {
+    //         console.error('Error accessing media devices:', err);
+    //     }
+    // };
+
+    const shareScreen = () => {
+        if (screenSharingId) {
+            navigator.mediaDevices            
+                .getUserMedia({ video: true, audio: true })
+                .then(switchStream); 
+        } else {
+            navigator.mediaDevices.getDisplayMedia({}).then((stream) => {
                 switchStream(stream);
-            } else {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                switchStream(stream);
-            }
-        } catch (err) {
-            console.error('Error accessing media devices:', err);
+                setScreenStream(stream);
+            });
         }
     };
 
@@ -176,6 +192,7 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         <RoomContext.Provider 
             value={{ 
                 stream, 
+                screenStream,
                 peers, 
                 shareScreen, 
                 roomId: roomId || "",
