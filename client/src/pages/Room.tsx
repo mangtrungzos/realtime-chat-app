@@ -24,7 +24,8 @@ export const Room = () => {
     const { userName, userId } = useContext(UserContext);
     const { toggleChat, chat } = useContext(ChatContext);
     useEffect(() => {
-        if (stream) ws.emit("join-room", {roomId: id, peerId: userId, userName});
+        if (stream) 
+            ws.emit("join-room", {roomId: id, peerId: userId, userName});
     }, [id, userId, stream, userName]);
 
     useEffect(() => {

@@ -21,7 +21,7 @@ export const ChatInput: React.FC = () => {
                         className="border rounded"
                         onChange={e => setMessage(e.target.value)} 
                         value={message} />
-                    <Button type="submit" className="bg-rose-400 p-2 mx-2 rounded-lg text-xl hover:bg-rose-600 text-white">
+                    <Button testId="send-msg-button" type="submit" className="bg-rose-400 p-2 mx-2 rounded-lg text-xl hover:bg-rose-600 text-white">
                     <svg
                         style={{}}
                         xmlns="http://www.w3.org/2000/svg" 

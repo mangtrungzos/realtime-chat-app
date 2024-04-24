@@ -61,4 +61,3 @@ test("room page renders video for every peer", () => {
   const videos = screen.getAllByTestId("peer-video");
   expect(videos).toHaveLength(3);
 });
-

@@ -895,7 +895,7 @@ path-to-regexp@0.1.7:
 
 peer@^1.0.2:
   version "1.0.2"
-  resolved "https://registry.yarnpkg.com/peer/-/peer-1.0.2.tgz#3d2afa575e29b1451e47c9e019754e5aa391ca4e"
+  resolved "https://registry.npmjs.org/peer/-/peer-1.0.2.tgz#3d2afa575e29b1451e47c9e019754e5aa391ca4e"
   integrity sha512-ZObVEhAaoskd3KuSxr5DJLM8QuqQW4w3i0MqrI8H7Bzz8DjRC3DjUg2XtQQGfdc36+8Xk+wIPT/tL5wE+KnIqg==
   dependencies:
     "@types/express" "^4.17.3"

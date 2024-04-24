@@ -49,7 +49,7 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     }: { 
         participants: Record<string, IPeer>;
     }) => {
-        console.log({participants});
+        // console.log({participants});
         dispatch(addAllPeersAction(participants));
     };
     const removePeer = (peerId: string) => {
@@ -60,7 +60,7 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         setScreenSharingId(me?.id || "");
 
         Object.values(me?.connections || {}).forEach((connection: any) => {
-            const videoTrack = stream
+            const videoTrack: any = stream
                 ?.getTracks()
                 .find((track) => track.kind === "video");
             connection[0].peerConnection
@@ -71,32 +71,33 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         });
     };
     
-    // const shareScreen = async () => {
-    //     try {
-    //         if (screenSharingId) {
-    //             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const shareScreen = async () => {
+        try {
+          if (screenSharingId) {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            switchStream(stream);
+          } else {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            switchStream(stream);
+            setScreenStream(stream);
+          }
+        } catch (err) {
+          console.error('Error accessing media devices:', err);
+        }
+      };
+
+    // const shareScreen = () => {
+    //     if (screenSharingId) {
+    //         navigator.mediaDevices            
+    //             .getUserMedia({ video: true, audio: true })
+    //             .then(switchStream); 
+    //     } else {
+    //         navigator.mediaDevices.getDisplayMedia({}).then((stream) => {
     //             switchStream(stream);
-    //         } else {
-    //             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-    //             switchStream(stream);
-    //         }
-    //     } catch (err) {
-    //         console.error('Error accessing media devices:', err);
+    //             setScreenStream(stream);
+    //         });
     //     }
     // };
-
-    const shareScreen = () => {
-        if (screenSharingId) {
-            navigator.mediaDevices            
-                .getUserMedia({ video: true, audio: true })
-                .then(switchStream); 
-        } else {
-            navigator.mediaDevices.getDisplayMedia({}).then((stream) => {
-                switchStream(stream);
-                setScreenStream(stream);
-            });
-        }
-    };
 
     const nameChangedHandler = ({ peerId, userName }: {
         peerId: string,
@@ -115,7 +116,7 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         const peer = new Peer(userId, {
             host: "localhost",
             port: 9000,
-            path: "/myapp"
+            path: "/"
         });
         // const peer = new Peer(meId)
         // Set State
@@ -161,10 +162,9 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     }, [screenSharingId, roomId]);
 
     useEffect(() => {
-        if (!me || !stream) return;
-
+        if (!me) return;
+        if (!stream) return;
         ws.on("user-joined", ({peerId, userName: name}) => {
-            dispatch(addPeerNameAction(peerId, name));   
             const call = me.call(peerId, stream, {
                 metadata: {
                     userName,
@@ -174,19 +174,60 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
             call.on("stream", (peerStream) => {
                 dispatch(addPeerStreamAction(peerId, peerStream));
             });
+            dispatch(addPeerNameAction(peerId, name));   
         });
 
         me.on("call", (call) => {
-            const { userName } = call.metadata.userName;
+            const { userName } = call.metadata;
             dispatch(addPeerNameAction(call.peer, userName));
             call.answer(stream);
             call.on("stream", (peerStream) => {
                 dispatch(addPeerStreamAction(call.peer, peerStream))
             });
         });
-    }, [me, stream, screenSharingId, userName]);
 
-    console.log({ peers });
+        return () => {
+            ws.off("user-joined");
+        };
+
+    }, [me, stream, userName]);
+
+    // useEffect(() => {
+    //     if (!me || !stream) return;
+      
+    //     if (ws) {
+    //       ws.on("user-joined", ({peerId, userName: name}) => {
+    //         dispatch(addPeerNameAction(peerId, name));
+    //         const call = me.call(peerId, stream, {
+    //           metadata: {
+    //             userName,
+    //           },
+    //         });
+      
+    //         if (call) {
+    //           call.on("stream", (peerStream) => {
+    //             dispatch(addPeerStreamAction(peerId, peerStream));
+    //           });
+    //         }
+    //       });
+    //     }
+      
+    //     if (me) {
+    //       me.on("call", (call) => {
+    //         const { userName } = call.metadata.userName;
+    //         dispatch(addPeerNameAction(call.peer, userName));
+    //         call.answer(stream);
+      
+    //         if (call) {
+    //           call.on("stream", (peerStream) => {
+    //             dispatch(addPeerStreamAction(call.peer, peerStream))
+    //           });
+    //         }
+    //       });
+    //     }
+    //   }, [me, stream, screenSharingId, userName]);
+
+    // console.log({ peers });
 
     return (
         <RoomContext.Provider 
@@ -195,10 +236,11 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
                 screenStream,
                 peers, 
                 shareScreen, 
-                roomId: roomId || "",
+                roomId,
                 setRoomId,
                 screenSharingId, 
-            }}>
+            }}
+        >
             {children}
         </RoomContext.Provider>
     );
