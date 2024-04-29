@@ -38,3 +38,13 @@
 ## test all file in client 
 \\ yarn test --coverage 
 \\ Room.test, Chat.test
+
+## End to end tesing with Cypress - client
+\\ yarn e2e 
+\\ ter: yarn start:all
+
+## Testing with Cypress stub
+\\
+
+# git
+\\ git push --force origin master

@@ -30,6 +30,11 @@ interface ChildProps {
     children: React.ReactNode;
 }   
 
+if (!!window.Cypress) {
+    window.Peer = Peer;
+}
+
+
 export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     const navigate = useNavigate();
     const { userName, userId } = useContext(UserContext);

@@ -1,6 +1,7 @@
 import { ADD_MESSAGE, ADD_HISTORY, TOGGLE_CHAT } from './chatActions';
 import { IMessage } from "../types/chat";
 
+// 
 export type ChatState = {
     messages: IMessage[];
     isChatOpen: boolean;
