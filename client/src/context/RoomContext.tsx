@@ -119,8 +119,10 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         
 
         const peer = new Peer(userId, {
-            host: "localhost",
-            port: 9000,
+            host: "13.210.68.104",
+            // host: "localhost",
+            // port: 9000,
+            port: 80,
             path: "/"
         });
         // const peer = new Peer(meId)
