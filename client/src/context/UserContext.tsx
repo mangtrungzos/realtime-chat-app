@@ -22,7 +22,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // const meId = savedId || uuidV4();
     const [userId] = useState(localStorage.getItem("userId") || uuidV4())
     const [userName, setUserName] = useState(
-        localStorage.getItem("userName") || "");
+        localStorage.getItem("userName") || ""
+    );
     
     useEffect(() => {
         localStorage.setItem("userName", userName);

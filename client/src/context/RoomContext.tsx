@@ -76,33 +76,35 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         });
     };
     
-    const shareScreen = async () => {
-        try {
-          if (screenSharingId) {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            switchStream(stream);
-          } else {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            switchStream(stream);
-            setScreenStream(stream);
-          }
-        } catch (err) {
-          console.error('Error accessing media devices:', err);
-        }
-      };
-
-    // const shareScreen = () => {
-    //     if (screenSharingId) {
-    //         navigator.mediaDevices            
-    //             .getUserMedia({ video: true, audio: true })
-    //             .then(switchStream); 
-    //     } else {
-    //         navigator.mediaDevices.getDisplayMedia({}).then((stream) => {
-    //             switchStream(stream);
-    //             setScreenStream(stream);
-    //         });
+    // const shareScreen = async () => {
+    //     try {
+    //       if (screenSharingId) {
+    //         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    //         switchStream(stream);
+    //       } else {
+    //         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    //         switchStream(stream);
+    //         setScreenStream(stream);
+    //       }
+    //     } catch (err) {
+    //       console.error('Error accessing media devices:', err);
     //     }
     // };
+
+    const shareScreen = () => {
+        if (screenSharingId) {
+            navigator.mediaDevices            
+                .getUserMedia({ video: true, audio: true })
+                .then(switchStream); 
+        } else {
+            navigator.mediaDevices.getDisplayMedia({}).then((stream) => {
+                switchStream(stream);
+                setScreenStream(stream);
+                console.log('Screen sharing ID:', screenSharingId);
+            });
+        }
+    };
+    
 
     const nameChangedHandler = ({ peerId, userName }: {
         peerId: string,
@@ -112,21 +114,18 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
     };
 
     useEffect(() => {
-        ws.emit("change-name", { peerId: userId, userName, roomId})
+        ws.emit("change-name", { peerId: userId, userName, roomId });
     }, [userName, userId,roomId]);
 
     useEffect(() => {
-        
-
         const peer = new Peer(userId, {
-            host: "13.210.68.104",
-            // host: "localhost",
-            // port: 9000,
-            port: 80,
+            // host: "13.210.68.104",
+            host: "localhost",
+            port: 9000,
+            // port: 80,
             path: "/"
+            
         });
-        // const peer = new Peer(meId)
-        // Set State
         setMe(peer);
 
         try {

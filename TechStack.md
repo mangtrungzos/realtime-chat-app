@@ -52,3 +52,5 @@
 # Deploy WeRTC app to AWS EC2 With docker 
 \\ Dockerfile - Use node:18-alpine
 \\ AWS
+
+home: "http://mangtrungzos.github.io/WebRTCVideoChat/"

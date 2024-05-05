@@ -32,7 +32,7 @@ export const Room = () => {
         setRoomId(id || "");
     }, [id, setRoomId]);
 
-    // console.log({screenSharingId});
+    console.log({screenSharingId});
     
     const screenSharingVideo = 
         screenSharingId === userId 
