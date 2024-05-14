@@ -12,7 +12,7 @@ export const Chat: React.FC = () => {
                 {chat.messages.map((message: IMessage) => (
                 <ChatBubble 
                     message={message} 
-                    key={message.timestamp + (message?.author || "anonymous")} 
+                    key={message.timestamp + (message?.author || "Sang")} 
                 />
             ))}
             </div>

@@ -43,7 +43,7 @@ export const Room = () => {
             
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="bg-red-500 p-4 text-white">Room id {id}</div>
+            {/* <div className="bg-red-500 p-4 text-white">Room id {id}</div> */}
             <div className="flex grow">
                 {screenSharingVideo && (
                     <div className="w-4/5 pr-4">

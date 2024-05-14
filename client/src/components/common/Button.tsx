@@ -20,7 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
             data-testid={testId}
             onClick={onClick} 
             className={classNames(
-                "bg-rose-400 p-2 rounded-lg hover:bg-rose-600 text-white", 
+                "bg-slate-500 px-4 rounded-full text-xl hover:bg-slate-600 text-white", 
                 className
             )}>
             {children}
