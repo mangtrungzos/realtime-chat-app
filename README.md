@@ -1,2 +1,2 @@
 # WebRTCVideoChat
-This is our team's project about WebRTC Video chat app
+Tech: ReacJS, Typescript, WebSocket - Socket.io, NodeJS, Tailwind CSS, peerjs
