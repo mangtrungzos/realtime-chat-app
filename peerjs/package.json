@@ -18,6 +18,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
-    "peer": "^1.0.2"
+    "peer": "^1.0.2",
+    "webrtc-react": "file:"
   }
 }

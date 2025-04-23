@@ -1,0 +1,23 @@
+# Dùng Node.js image
+FROM node:18
+
+# Thiết lập thư mục làm việc
+WORKDIR /server
+
+# Copy file cấu hình
+COPY package.json yarn.lock ./
+
+# Cài đặt dependencies
+RUN yarn install
+
+# Copy toàn bộ mã nguồn
+COPY . .
+
+# Biên dịch TypeScript
+RUN yarn build
+
+# Mở cổng ứng dụng
+EXPOSE 8080
+
+# Chạy ứng dụng từ file đã biên dịch
+CMD ["node", "dist/index.js"]
