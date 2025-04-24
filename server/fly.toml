@@ -21,11 +21,11 @@ app = "realtime-chat-app"
     soft_limit = 20
     type = "connections"
   [services.http_checks]
-    grace_period = "5s"
+    grace_period = "30s"
     interval = "10s"
     method = "GET"
-    path = "/"
+    path = "/health"
     port = 8080
     protocol = "http"
-    timeout = "2s"
+    timeout = "10s"
     retries = 3

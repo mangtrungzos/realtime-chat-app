@@ -75,21 +75,6 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
                 .catch((err: any) => console.error(err));
         });
     };
-    
-    // const shareScreen = async () => {
-    //     try {
-    //       if (screenSharingId) {
-    //         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    //         switchStream(stream);
-    //       } else {
-    //         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-    //         switchStream(stream);
-    //         setScreenStream(stream);
-    //       }
-    //     } catch (err) {
-    //       console.error('Error accessing media devices:', err);
-    //     }
-    // };
 
     const shareScreen = () => {
         if (screenSharingId) {
@@ -119,12 +104,14 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
 
     useEffect(() => {
         const peer = new Peer(userId, {
-            // host: "13.210.68.104",
-            host: "localhost",
-            port: 9000,
-            // port: 80,
-            path: "/"
-            
+            // // host: "13.210.68.104",
+            // host: "localhost",
+            // port: 9000,
+            // // port: 80,
+            // path: "/"
+            port: process.env.REACT_APP_PEER_PORT ? parseInt(process.env.REACT_APP_PEER_PORT) : 9000,
+            path: process.env.REACT_APP_PEER_PATH || "/",
+            secure: process.env.REACT_APP_PEER_SECURE === "true"
         });
         setMe(peer);
 
@@ -197,43 +184,6 @@ export const RoomProvider: React.FC<ChildProps> = ({ children }) => {
         };
 
     }, [me, stream, userName]);
-
-    // useEffect(() => {
-    //     if (!me || !stream) return;
-      
-    //     if (ws) {
-    //       ws.on("user-joined", ({peerId, userName: name}) => {
-    //         dispatch(addPeerNameAction(peerId, name));
-    //         const call = me.call(peerId, stream, {
-    //           metadata: {
-    //             userName,
-    //           },
-    //         });
-      
-    //         if (call) {
-    //           call.on("stream", (peerStream) => {
-    //             dispatch(addPeerStreamAction(peerId, peerStream));
-    //           });
-    //         }
-    //       });
-    //     }
-      
-    //     if (me) {
-    //       me.on("call", (call) => {
-    //         const { userName } = call.metadata.userName;
-    //         dispatch(addPeerNameAction(call.peer, userName));
-    //         call.answer(stream);
-      
-    //         if (call) {
-    //           call.on("stream", (peerStream) => {
-    //             dispatch(addPeerStreamAction(call.peer, peerStream))
-    //           });
-    //         }
-    //       });
-    //     }
-    //   }, [me, stream, screenSharingId, userName]);
-
-    // console.log({ peers });
 
     return (
         <RoomContext.Provider 
